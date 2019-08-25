@@ -9,6 +9,7 @@ module Data.ZipperArray
 
     , cons
     , cons'
+    , appendArray
     , modifyCurrent
     , modifyAt
     , deleteWith
@@ -96,6 +97,9 @@ cons x (Private_ arr i cur) = Private_ (NEA.cons x arr) (i + 1) cur
 
 cons' :: forall a. a -> Array a -> ZipperArray a
 cons' x xs = fromNonEmptyArray $ NEA.cons' x xs
+
+appendArray :: forall a. ZipperArray a -> Array a -> ZipperArray a
+appendArray (Private_ arr i cur) tail = Private_ (NEA.appendArray arr tail) i cur
 
 modifyCurrent :: forall a. (a -> a) -> ZipperArray a -> ZipperArray a
 modifyCurrent f (Private_ arr i cur) =
