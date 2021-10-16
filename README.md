@@ -5,18 +5,25 @@ A non-empty array with one element focused.
 
 ## Developing
 
-1. Install purescript: `npm install -g purescript`
-2. Install bower: `npm install -g bower`
-3. Install pulp: `npm install -g pulp`
-4. Install dependencies: `npm install && bower install`
-5. Run tests: `pulp test`
+### Get packages
 
-_or_
+Using NPM
 
-Use Nix Flakes:
+```
+$ npm install -g purescript spago
+$ spago install
+```
+
+Using Nix Flakes
 
 ```console
 $ nix develop
+$ spago install
+```
+
+### Run tests
+
+```console
 $ spago --config test/test.dhall test
 ```
 
