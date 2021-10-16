@@ -11,9 +11,18 @@ A non-empty array with one element focused.
 4. Install dependencies: `npm install && bower install`
 5. Run tests: `pulp test`
 
+_or_
+
+Use Nix Flakes:
+
+```console
+$ nix develop
+$ spago --config test/test.dhall test
+```
+
 ## License
 
-Licensed under a MIT license
+Licensed under a MIT license — see the LICENSE file in this project for details.
 
 ## Documentation
 
