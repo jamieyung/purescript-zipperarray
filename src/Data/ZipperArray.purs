@@ -99,29 +99,33 @@ cons' :: forall a. a -> Array a -> ZipperArray a
 cons' x xs = fromNonEmptyArray $ NEA.cons' x xs
 
 appendArray :: forall a. ZipperArray a -> Array a -> ZipperArray a
-appendArray (Private_ arr i cur) tail = Private_ (NEA.appendArray arr tail) i cur
+appendArray (Private_ arr i cur) tail =
+    Private_ (NEA.appendArray arr tail) i cur
 
 modifyCurrent :: forall a. (a -> a) -> ZipperArray a -> ZipperArray a
 modifyCurrent f (Private_ arr i cur) =
-    Private_ (NEA.modifyAtIndices [i] f arr) i (f cur)
+    Private_ (NEA.modifyAtIndices [ i ] f arr) i (f cur)
 
-modifyAt :: forall a. Natural -> (a -> a) -> ZipperArray a -> Maybe (ZipperArray a)
+modifyAt ::
+    forall a. Natural -> (a -> a) -> ZipperArray a -> Maybe (ZipperArray a)
 modifyAt idx_ f (Private_ arr i cur) = do
     let idx = natToInt idx_
     arr' <- NEA.modifyAt idx f arr
     let cur' = if idx == i then f cur else cur
     pure $ Private_ arr' i cur'
 
-deleteWith :: forall a.
+deleteWith ::
+    forall a.
     DeleteFocusedItemFocusBumpPolicy ->
     (a -> Boolean) ->
     ZipperArray a ->
     DeleteItemResult a
-deleteWith policy p (Private_ arr i cur) = case NEA.findIndex p arr of
+deleteWith policy p (Private_ arr i _) = case NEA.findIndex p arr of
     Nothing -> DeleteItemFailure
     Just idx -> fromMaybe DeleteItemSuccessEmpty do
         arr' <- NEA.deleteAt idx arr >>= NEA.fromArray
-        let i' =
+        let
+            i' =
                 -- 1. An item before the current one was deleted, which bumps
                 -- the current item's position down by one.
                 if idx < i then i - 1
@@ -194,7 +198,8 @@ next (Private_ arr i _) = NEA.index arr (i + 1)
 -- | Performs a foldl using the provided functions to transform the items. The
 -- | `cur` function is used for the current item, and the `rest` function is
 -- | used for the other items.
-foldlCurrent :: forall a b.
+foldlCurrent ::
+    forall a b.
     { cur :: b -> a -> b, rest :: b -> a -> b } ->
     b ->
     ZipperArray a ->
@@ -270,7 +275,7 @@ focusWith p (Private_ arr _ _) = do
     pure $ Private_ arr i cur
 
 goIndex :: forall a. Natural -> ZipperArray a -> Maybe (ZipperArray a)
-goIndex idx_ (Private_ arr i _) = do
+goIndex idx_ (Private_ arr _ _) = do
     let idx = natToInt idx_
     guard $ idx < NEA.length arr
     cur <- NEA.index arr idx
@@ -287,7 +292,7 @@ goLast (Private_ arr _ _) = Private_ arr (NEA.length arr - 1) (NEA.last arr)
 -- | Focuses the previous item in the array if it exists. Returns Nothing if
 -- | there is no item preceding the current item.
 goPrev :: forall a. ZipperArray a -> Maybe (ZipperArray a)
-goPrev z@(Private_ arr i cur) = do
+goPrev z@(Private_ arr i _) = do
     cur' <- prev z
     pure $ Private_ arr (i - 1) cur'
 
@@ -321,7 +326,8 @@ instance functorZipperArray :: Functor ZipperArray where
     map f (Private_ arr i cur) = Private_ (map f arr) i (f cur)
 
 instance functorWithIndex :: FunctorWithIndex Int ZipperArray where
-    mapWithIndex f (Private_ arr i cur) = Private_ (mapWithIndex f arr) i (f i cur)
+    mapWithIndex f (Private_ arr i cur) =
+        Private_ (mapWithIndex f arr) i (f i cur)
 
 instance foldableZipperArray :: Foldable ZipperArray where
     foldl f z zArr = foldl f z (toArray zArr)
